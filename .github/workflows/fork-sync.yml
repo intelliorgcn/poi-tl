@@ -20,7 +20,7 @@ jobs:
                                 # (but actions/checkout@v2 can also be instructed
                                 # to fetch all git depth right from the start)
           @添加上游仓库如果是其他上游仓库自行修改
-		      git remote add upstream https://github.com/Sayi/poi-tl.git
+	  git remote add upstream https://github.com/Sayi/poi-tl.git
           git fetch upstream
           # Neither forget the -b opt,
           # the feature/x ref is ambiguous at this stage
