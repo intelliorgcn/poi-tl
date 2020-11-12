@@ -1,4 +1,3 @@
-vi .github/workflows/fork-sync.yml
 name: Merge upstream branches
 on:
   push:
