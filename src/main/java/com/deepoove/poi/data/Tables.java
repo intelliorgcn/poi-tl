@@ -76,29 +76,23 @@ public class Tables {
     }
 
     public static TableBuilder ofFitWidth() {
-        TableBuilder inst = new TableBuilder();
-        TableStyle style = new TableStyle();
-        style.setWidthScalePattern(WidthScalePattern.FIT);
-        inst.data.setTableStyle(style);
-        return inst;
+        return ofFitWidth(null);
     }
 
-    public static TableBuilder ofWidth(double cmWidth, double[] colCmWidths) {
-        TableBuilder inst = new TableBuilder();
-        inst.width(cmWidth, colCmWidths);
-        return inst;
+    public static TableBuilder ofFitWidth(int[] colWidthsPercent) {
+        return new TableBuilder().fitWidth(colWidthsPercent);
+    }
+
+    public static TableBuilder ofWidth(double widthCm, double[] colWidthsCm) {
+        return new TableBuilder().width(widthCm, colWidthsCm);
     }
 
     public static TableBuilder ofPercentWidth(String percent) {
-        TableBuilder inst = new TableBuilder();
-        TableStyle style = new TableStyle();
-        style.setWidth(percent);
-        inst.data.setTableStyle(style);
-        return inst;
+        return new TableBuilder().percentOrAutoWidth(percent);
     }
 
     public static TableBuilder ofAutoWidth() {
-        return ofPercentWidth("auto");
+        return new TableBuilder().percentOrAutoWidth("auto");
     }
 
     public static TableRenderData create(RowRenderData... row) {
@@ -115,16 +109,38 @@ public class Tables {
 
         private TableBuilder() {
             data = new TableRenderData();
+            border(BorderStyle.DEFAULT);
+            cellMargin(0, 0.19f, 0, 0.19f);
         }
 
-        public TableBuilder width(double cmWidth, double[] colCmWidths) {
+        public TableBuilder width(double widthCm, double[] colWidthsCm) {
             TableStyle style = getTableStyle();
-            style.setWidth(UnitUtils.cm2Twips(cmWidth) + "");
-            if (null != colCmWidths) {
-                int[] colWidths = Arrays.stream(colCmWidths).mapToInt(UnitUtils::cm2Twips).toArray();
+            style.setWidth(UnitUtils.cm2Twips(widthCm) + "");
+            if (null != colWidthsCm) {
+                int[] colWidths = Arrays.stream(colWidthsCm).mapToInt(UnitUtils::cm2Twips).toArray();
                 style.setColWidths(colWidths);
             }
             style.setWidthScalePattern(WidthScalePattern.NONE);
+            return this;
+        }
+
+        public TableBuilder fitWidth(int[] colWidthsPercent) {
+            TableStyle style = getTableStyle();
+            if (null != colWidthsPercent) {
+                int sum = Arrays.stream(colWidthsPercent).sum();
+                if (sum != 100) {
+                    throw new IllegalArgumentException("The sum of the percentages must be 100");
+                }
+            }
+            style.setWidthScalePattern(WidthScalePattern.FIT);
+            style.setColWidths(colWidthsPercent);
+            return this;
+        }
+
+        public TableBuilder percentOrAutoWidth(String percentOrAutoWidth) {
+            TableStyle style = getTableStyle();
+            style.setWidthScalePattern(WidthScalePattern.NONE);
+            style.setWidth(percentOrAutoWidth);
             return this;
         }
 
@@ -150,6 +166,15 @@ public class Tables {
             getTableStyle().setBottomBorder(border);
             getTableStyle().setInsideHBorder(border);
             getTableStyle().setInsideVBorder(border);
+            return this;
+        }
+
+        public TableBuilder cellMargin(double topCm, double leftCm, double bottomCm, double rightCm) {
+            TableStyle tableStyle = getTableStyle();
+            tableStyle.setTopCellMargin(UnitUtils.cm2Twips(topCm));
+            tableStyle.setLeftCellMargin(UnitUtils.cm2Twips(leftCm));
+            tableStyle.setBottomCellMargin(UnitUtils.cm2Twips(bottomCm));
+            tableStyle.setRightCellMargin(UnitUtils.cm2Twips(rightCm));
             return this;
         }
 
